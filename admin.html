@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — Bouncy Beans Soft Play</title>
+<link rel="stylesheet" href="assets/styles.css">
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body>
+<header class="header">
+  <div class="logo">BB</div>
+  <div>
+    <h1>Bouncy Beans Soft Play</h1>
+    <p class="subtitle">Admin — generate a client booking link</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- LOGIN -->
+  <section id="login-view" class="card">
+    <h2>Admin login</h2>
+    <p class="muted small">Enter the admin password to continue.</p>
+    <div id="login-error" class="banner err hidden"></div>
+    <div class="row">
+      <div>
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password">
+      </div>
+    </div>
+    <button id="login-btn" class="btn block large">Sign in</button>
+  </section>
+
+  <!-- MAIN ADMIN -->
+  <section id="admin-view" class="hidden">
+
+    <div class="card">
+      <h2>1. Client information</h2>
+      <div class="row two">
+        <div><label for="clientName">Client name *</label><input id="clientName" type="text"></div>
+        <div><label for="clientEmail">Client email *</label><input id="clientEmail" type="email"></div>
+      </div>
+      <div class="row two">
+        <div><label for="clientPhone">Client phone</label><input id="clientPhone" type="tel"></div>
+        <div><label for="eventDate">Event date *</label><input id="eventDate" type="date"></div>
+      </div>
+      <div class="row three">
+        <div><label for="setupTime">Setup time *</label><input id="setupTime" type="time"></div>
+        <div><label for="eventStart">Event start *</label><input id="eventStart" type="time"></div>
+        <div>
+          <label for="rentalHours">Rental duration *</label>
+          <select id="rentalHours">
+            <option value="1">1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4" selected>4 hours (max)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div><label for="eventAddress">Event address *</label><input id="eventAddress" type="text" placeholder="Street, City, Postal code"></div>
+      </div>
+      <div class="row two">
+        <div>
+          <label for="inCity">Location</label>
+          <select id="inCity">
+            <option value="in">Inside City of Winnipeg (free delivery)</option>
+            <option value="out">Outside Winnipeg (delivery fee)</option>
+          </select>
+        </div>
+        <div>
+          <label for="deliveryFee">Delivery fee (CAD)</label>
+          <input id="deliveryFee" type="number" min="0" step="1" value="0">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="notes">Internal notes (not shown to client)</label>
+          <textarea id="notes" placeholder="Optional"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Pick items</h2>
+      <p class="muted small">Tap items to add them to the booking.</p>
+      <div id="items-grid" class="items-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Summary</h2>
+      <table class="summary-table" id="summary-table">
+        <thead>
+          <tr><th>Item</th><th class="right">Price</th></tr>
+        </thead>
+        <tbody id="summary-body"><tr><td colspan="2" class="muted">No items selected yet.</td></tr></tbody>
+        <tfoot>
+          <tr><td>Subtotal</td><td class="right" id="sum-subtotal">$0</td></tr>
+          <tr><td>Delivery fee</td><td class="right" id="sum-delivery">$0</td></tr>
+          <tr><td>Deposit (security / damage, refundable)</td><td class="right" id="sum-deposit">$150</td></tr>
+          <tr><td>Total due</td><td class="right" id="sum-total">$150</td></tr>
+        </tfoot>
+      </table>
+      <p class="muted small">Deposit is $150 CAD and is refunded 24–48 hours after the event if no damage is found. The remaining balance is due the day of the event before setup.</p>
+    </div>
+
+    <div class="card">
+      <h2>4. Generate booking link</h2>
+      <div id="admin-error" class="banner err hidden"></div>
+      <button id="generate-btn" class="btn large">Generate link for client</button>
+      <div id="result" class="hidden" style="margin-top:16px;">
+        <p class="small muted">Share this link with the client. They'll review, fill in any remaining details, and sign the agreement.</p>
+        <div class="result-link"><span id="result-link-text"></span></div>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button id="copy-btn" class="btn secondary">Copy link</button>
+          <a id="open-btn" class="btn secondary" target="_blank" rel="noopener">Open preview</a>
+          <button id="new-btn" class="btn ghost">Create another</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="small muted" style="text-align:right;"><a href="#" id="logout">Log out</a></p>
+  </section>
+</main>
+
+<footer>© <span id="year"></span> Bouncy Beans Soft Play — admin</footer>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script type="module" src="assets/admin.js"></script>
+</body>
+</html>

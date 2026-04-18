@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign your rental agreement — Bouncy Beans Soft Play</title>
+<link rel="stylesheet" href="assets/styles.css">
+<!-- jsPDF + signature_pad (CDNs) -->
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js" defer></script>
+</head>
+<body>
+<header class="header">
+  <div class="logo">BB</div>
+  <div>
+    <h1>Bouncy Beans Soft Play</h1>
+    <p class="subtitle">Rental agreement — review &amp; sign</p>
+  </div>
+</header>
+
+<main class="container">
+
+  <div id="loading" class="card">
+    <p class="muted">Loading your booking…</p>
+  </div>
+
+  <div id="not-found" class="card hidden">
+    <h2>We couldn't find this booking</h2>
+    <p>This link may have expired, already been signed, or been copied incorrectly. Please contact us:</p>
+    <p><a href="mailto:bouncybeanssoftplay@gmail.com">bouncybeanssoftplay@gmail.com</a></p>
+  </div>
+
+  <div id="already-signed" class="card hidden">
+    <h2>✅ This agreement has already been signed</h2>
+    <p>If you need a copy of your signed rental agreement, please contact us at <a href="mailto:bouncybeanssoftplay@gmail.com">bouncybeanssoftplay@gmail.com</a>.</p>
+  </div>
+
+  <div id="view" class="hidden">
+
+    <section class="card">
+      <h2>Your booking</h2>
+      <div id="client-block" class="row two"></div>
+    </section>
+
+    <section class="card">
+      <h2>Items &amp; pricing</h2>
+      <table class="summary-table" id="items-table">
+        <thead><tr><th>Item</th><th class="right">Price (CAD)</th></tr></thead>
+        <tbody id="items-body"></tbody>
+        <tfoot>
+          <tr><td>Subtotal</td><td class="right" id="f-subtotal"></td></tr>
+          <tr><td>Delivery fee</td><td class="right" id="f-delivery"></td></tr>
+          <tr><td>Deposit (refundable 24–48h after event if no damage)</td><td class="right" id="f-deposit"></td></tr>
+          <tr><td><strong>Total due</strong></td><td class="right"><strong id="f-total"></strong></td></tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Rental Agreement</h2>
+      <p class="muted small">Please read the full agreement below. Scroll to the end to confirm.</p>
+      <div id="agreement" class="agreement"></div>
+      <label style="display:flex; gap:8px; margin-top:12px; align-items:flex-start;">
+        <input type="checkbox" id="agree-check" style="width:18px; height:18px; margin-top:2px;">
+        <span>I have read and I agree to the Rental Agreement terms above.</span>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Signature</h2>
+      <p class="muted small">Sign in the box below using your mouse or finger.</p>
+      <div class="sig-wrap"><canvas id="sig-canvas"></canvas></div>
+      <div class="sig-actions">
+        <span class="small muted">Signed on: <span id="sig-date"></span></span>
+        <button id="clear-sig" class="btn ghost">Clear</button>
+      </div>
+
+      <div id="sign-error" class="banner err hidden" style="margin-top:12px;"></div>
+      <button id="submit-btn" class="btn block large" style="margin-top:10px;" disabled>Sign &amp; confirm booking</button>
+      <p class="small muted" style="margin-top:10px;">By clicking Sign &amp; Confirm, you acknowledge that you have read and agree to the Rental Agreement above. A signed PDF copy will be emailed to you.</p>
+    </section>
+  </div>
+
+  <div id="submitting" class="card hidden">
+    <h2>Submitting your signed agreement…</h2>
+    <p class="muted">Please don't close this window. This usually takes a few seconds.</p>
+  </div>
+</main>
+
+<footer>© <span id="year"></span> Bouncy Beans Soft Play · bouncybeanswpg.ca</footer>
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script type="module" src="assets/sign.js"></script>
+</body>
+</html>
