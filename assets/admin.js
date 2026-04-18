@@ -4,12 +4,14 @@ import { ITEMS } from "./items.js";
 // ---------- State ----------
 const state = {
   selectedIds: new Set(),
+  priceOverrides: {},   // { itemId: price }
+  customItems: [],      // [{ id, name, price }]
 };
 
 const $ = (sel) => document.querySelector(sel);
 const fmt = (n) => "$" + Number(n || 0).toFixed(0);
 
-// ---------- Auth (simple bearer token stored in sessionStorage) ----------
+// ---------- Auth ----------
 function getToken() { return sessionStorage.getItem("bb_admin_token"); }
 function setToken(t) { sessionStorage.setItem("bb_admin_token", t); }
 function clearToken() { sessionStorage.removeItem("bb_admin_token"); }
@@ -49,55 +51,110 @@ function showAdmin() {
   $("#login-view").classList.add("hidden");
   $("#admin-view").classList.remove("hidden");
   renderItems();
+  renderCustomItems();
   renderSummary();
-}
-
-function renderItems() {
-  const grid = $("#items-grid");
-  grid.innerHTML = "";
-  for (const item of ITEMS) {
-    const el = document.createElement("div");
-    el.className = "item-card" + (state.selectedIds.has(item.id) ? " selected" : "");
-    el.innerHTML = `
-      <div class="title">${escapeHtml(item.name)}</div>
-      <div class="sub">${item.ageRange ? escapeHtml(item.ageRange) : "&nbsp;"}</div>
-      <div class="price">${fmt(item.price)} CAD</div>
-      <ul>${item.features.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul>
-    `;
-    el.addEventListener("click", () => {
-      if (state.selectedIds.has(item.id)) state.selectedIds.delete(item.id);
-      else state.selectedIds.add(item.id);
-      renderItems();
-      renderSummary();
-    });
-    grid.appendChild(el);
-  }
-}
-
-function renderSummary() {
-  const body = $("#summary-body");
-  const selected = ITEMS.filter((i) => state.selectedIds.has(i.id));
-  if (!selected.length) {
-    body.innerHTML = '<tr><td colspan="2" class="muted">No items selected yet.</td></tr>';
-  } else {
-    body.innerHTML = selected
-      .map((i) => `<tr><td>${escapeHtml(i.name)}</td><td class="right">${fmt(i.price)}</td></tr>`)
-      .join("");
-  }
-  const subtotal = selected.reduce((s, i) => s + Number(i.price || 0), 0);
-  const deposit = CONFIG.BUSINESS.depositAmount;
-  $("#sum-subtotal").textContent = fmt(subtotal);
-  $("#sum-deposit").textContent = fmt(deposit);
-  $("#sum-total").textContent = fmt(subtotal + deposit);
 }
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+function getItemPrice(item) {
+  return state.priceOverrides[item.id] !== undefined
+    ? state.priceOverrides[item.id]
+    : Number(item.price || 0);
+}
+
+function renderItems() {
+  const grid = $("#items-grid");
+  grid.innerHTML = "";
+  for (const item of ITEMS) {
+    const selected = state.selectedIds.has(item.id);
+    const price = getItemPrice(item);
+    const el = document.createElement("div");
+    el.className = "item-card" + (selected ? " selected" : "");
+    el.innerHTML = `
+      <div class="title">${escapeHtml(item.name)}</div>
+      <div class="sub">${item.ageRange ? escapeHtml(item.ageRange) : "&nbsp;"}</div>
+      <ul>${item.features.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul>
+      ${selected ? `
+        <div style="margin-top:8px;" onclick="event.stopPropagation()">
+          <label style="font-size:0.8rem;font-weight:600;">Price (CAD)</label>
+          <input type="number" class="price-input" data-id="${escapeHtml(item.id)}"
+            value="${price}" min="0" step="1"
+            style="width:100%;padding:4px 8px;font-size:0.9rem;border:1px solid var(--border);border-radius:6px;">
+        </div>` : `<div class="price">${fmt(price)} CAD</div>`}
+    `;
+    el.addEventListener("click", () => {
+      if (state.selectedIds.has(item.id)) {
+        state.selectedIds.delete(item.id);
+        delete state.priceOverrides[item.id];
+      } else {
+        state.selectedIds.add(item.id);
+      }
+      renderItems();
+      renderSummary();
+    });
+    grid.appendChild(el);
+  }
+
+  // Attach price input listeners
+  grid.querySelectorAll(".price-input").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const id = e.target.dataset.id;
+      state.priceOverrides[id] = Number(e.target.value || 0);
+      renderSummary();
+    });
+  });
+}
+
+function renderCustomItems() {
+  const list = $("#custom-items-list");
+  if (!state.customItems.length) { list.innerHTML = ""; return; }
+  list.innerHTML = state.customItems.map((ci, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="flex:1">${escapeHtml(ci.name)}</span>
+      <span style="font-weight:600;">${fmt(ci.price)}</span>
+      <button class="btn ghost" style="padding:4px 10px;font-size:0.8rem;" data-idx="${i}">Remove</button>
+    </div>
+  `).join("");
+  list.querySelectorAll("button[data-idx]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      state.customItems.splice(Number(btn.dataset.idx), 1);
+      renderCustomItems();
+      renderSummary();
+    });
+  });
+}
+
+function renderSummary() {
+  const body = $("#summary-body");
+  const selected = ITEMS.filter((i) => state.selectedIds.has(i.id));
+  const allItems = [
+    ...selected.map((i) => ({ name: i.name, price: getItemPrice(i) })),
+    ...state.customItems,
+  ];
+
+  if (!allItems.length) {
+    body.innerHTML = '<tr><td colspan="2" class="muted">No items selected yet.</td></tr>';
+  } else {
+    body.innerHTML = allItems
+      .map((i) => `<tr><td>${escapeHtml(i.name)}</td><td class="right">${fmt(i.price)}</td></tr>`)
+      .join("");
+  }
+
+  const subtotal = allItems.reduce((s, i) => s + Number(i.price || 0), 0);
+  const delivery = Number($("#deliveryFee").value || 0);
+  const deposit = CONFIG.BUSINESS.depositAmount;
+  $("#sum-subtotal").textContent = fmt(subtotal);
+  $("#sum-delivery").textContent = fmt(delivery);
+  $("#sum-deposit").textContent = fmt(deposit);
+  $("#sum-total").textContent = fmt(subtotal + delivery + deposit);
+}
+
 // ---------- Create booking ----------
 function validate() {
-  if (!state.selectedIds.size) return "Please select at least one item.";
+  if (!state.selectedIds.size && !state.customItems.length) return "Please select at least one item.";
   return null;
 }
 
@@ -114,7 +171,10 @@ async function createBooking() {
     client: {},
     event: {},
     items: [...state.selectedIds],
-    deliveryFee: 0,
+    priceOverrides: { ...state.priceOverrides },
+    customItems: state.customItems.map((ci) => ({ ...ci })),
+    deliveryFee: Number($("#deliveryFee").value || 0),
+    inCity: $("#inCity").value === "in",
     deposit: CONFIG.BUSINESS.depositAmount,
     notes: $("#notes").value.trim(),
   };
@@ -129,11 +189,7 @@ async function createBooking() {
       },
       body: JSON.stringify(payload),
     });
-    if (r.status === 401) {
-      clearToken();
-      showLogin("Session expired. Please sign in again.");
-      return;
-    }
+    if (r.status === 401) { clearToken(); showLogin("Session expired. Please sign in again."); return; }
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Server error");
     const { id } = await r.json();
     const link = `${CONFIG.SITE_URL}/sign.html?id=${encodeURIComponent(id)}`;
@@ -152,7 +208,20 @@ async function createBooking() {
 
 // ---------- Boot ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  // copy / reset / logout
+  $("#deliveryFee").addEventListener("input", renderSummary);
+  $("#inCity").addEventListener("change", renderSummary);
+
+  $("#add-custom-btn").addEventListener("click", () => {
+    const name = $("#custom-name").value.trim();
+    const price = Number($("#custom-price").value || 0);
+    if (!name) { alert("Please enter an item name."); return; }
+    state.customItems.push({ id: "custom-" + Date.now(), name, price });
+    $("#custom-name").value = "";
+    $("#custom-price").value = "";
+    renderCustomItems();
+    renderSummary();
+  });
+
   $("#copy-btn").addEventListener("click", async () => {
     const text = $("#result-link-text").textContent;
     try {
@@ -163,21 +232,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Copy failed — select the link manually.");
     }
   });
+
   $("#new-btn").addEventListener("click", () => {
     state.selectedIds = new Set();
+    state.priceOverrides = {};
+    state.customItems = [];
     $("#notes").value = "";
+    $("#deliveryFee").value = 0;
+    $("#inCity").value = "in";
     $("#result").classList.add("hidden");
     renderItems();
+    renderCustomItems();
     renderSummary();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+
   $("#logout").addEventListener("click", (e) => {
     e.preventDefault();
     clearToken();
     location.reload();
   });
 
-  // login handling
   $("#login-btn").addEventListener("click", async () => {
     const pw = $("#password").value;
     $("#login-error").classList.add("hidden");
@@ -194,10 +269,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       $("#login-btn").textContent = "Sign in";
     }
   });
+
   $("#password").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#login-btn").click(); });
   $("#generate-btn").addEventListener("click", createBooking);
 
-  // check existing session
   if (await checkToken()) showAdmin();
   else showLogin();
 });

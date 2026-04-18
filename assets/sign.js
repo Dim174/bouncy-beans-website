@@ -22,33 +22,49 @@ function show(id) {
   );
 }
 
-function renderClient() {
-  const c = $("#client-block");
-  const rows = [
-    ["Event date", order.event?.date],
-    ["Setup time", order.event?.setupTime],
-    ["Event start", order.event?.start],
-    ["Rental duration", `${order.event?.rentalHours} hour${order.event?.rentalHours === 1 ? "" : "s"}`],
-    ["Event address", order.event?.address],
-  ];
-  c.innerHTML = rows
-    .map(([l, v]) => `<div><label>${escapeHtml(l)}</label><div>${escapeHtml(v || "—")}</div></div>`)
-    .join("");
+function getItemPrice(item) {
+  if (order.priceOverrides && order.priceOverrides[item.id] !== undefined) {
+    return Number(order.priceOverrides[item.id]);
+  }
+  return Number(item.price || 0);
 }
 
 function renderItems() {
   const tbody = $("#items-body");
   let subtotal = 0;
   const rows = [];
-  for (const id of order.items) {
+
+  // Catalog items
+  for (const id of (order.items || [])) {
     const it = getItemById(id);
     if (!it) continue;
-    subtotal += Number(it.price || 0);
-    rows.push(
-      `<tr><td><strong>${escapeHtml(it.name)}</strong>${it.ageRange ? `<br><span class="muted small">${escapeHtml(it.ageRange)}</span>` : ""}</td><td class="right">${money(it.price)}</td></tr>`
-    );
+    const price = getItemPrice(it);
+    subtotal += price;
+    rows.push(`
+      <tr>
+        <td>
+          <strong>${escapeHtml(it.name)}</strong>
+          ${it.ageRange ? `<br><span class="muted small">${escapeHtml(it.ageRange)}</span>` : ""}
+          <ul style="margin:6px 0 0 0;padding-left:18px;font-size:0.85rem;color:#555;">
+            ${it.features.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
+          </ul>
+        </td>
+        <td class="right" style="vertical-align:top;">${money(price)}</td>
+      </tr>`);
   }
+
+  // Custom items
+  for (const ci of (order.customItems || [])) {
+    subtotal += Number(ci.price || 0);
+    rows.push(`
+      <tr>
+        <td><strong>${escapeHtml(ci.name)}</strong></td>
+        <td class="right">${money(ci.price)}</td>
+      </tr>`);
+  }
+
   tbody.innerHTML = rows.join("") || '<tr><td colspan="2" class="muted">No items.</td></tr>';
+
   const delivery = Number(order.deliveryFee || 0);
   const deposit  = Number(order.deposit || CONFIG.BUSINESS.depositAmount);
   $("#f-subtotal").textContent = money(subtotal);
@@ -71,7 +87,6 @@ function renderAgreement() {
 
 function setupSignaturePad() {
   const canvas = $("#sig-canvas");
-  // HiDPI scaling
   function resize() {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     canvas.width = canvas.offsetWidth * ratio;
@@ -100,7 +115,8 @@ function updateSubmitButton() {
   const addressOk = $("#ev-address").value.trim().length > 0;
   const setupOk = $("#ev-setup").value.trim().length > 0;
   const startOk = $("#ev-start").value.trim().length > 0;
-  const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
+  const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk
+    && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
 }
 
@@ -113,7 +129,6 @@ async function loadOrder() {
     if (!r.ok) throw new Error("Server error");
     order = await r.json();
     if (order.status === "signed") { show("already-signed"); return; }
-
     renderItems();
     renderAgreement();
     show("view");
@@ -141,7 +156,7 @@ async function submit() {
     start: $("#ev-start").value,
     rentalHours: Number($("#ev-hours").value),
     address: $("#ev-address").value.trim(),
-    inCity: $("#ev-city").value === "in",
+    inCity: order.inCity !== undefined ? order.inCity : true,
   };
 
   if (!clientInfo.name || !clientInfo.email) {
@@ -164,7 +179,6 @@ async function submit() {
 
     show("submitting");
 
-    // dataUrl: "data:application/pdf;base64,XXXX"
     const base64 = dataUrl.split(",")[1];
 
     const r = await fetch(`${CONFIG.WORKER_URL}/api/orders/${encodeURIComponent(order.id)}/sign`, {
@@ -172,7 +186,7 @@ async function submit() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         signedAt,
-        signatureDataUrl,   // for audit trail
+        signatureDataUrl,
         pdfBase64: base64,
         pdfFilename: filename,
         clientInfo,
@@ -180,7 +194,6 @@ async function submit() {
       }),
     });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Submission failed");
-    // success
     window.location.href = "success.html";
   } catch (e) {
     show("view");
@@ -195,9 +208,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#" + id).addEventListener("input", updateSubmitButton)
   );
   $("#ev-hours").addEventListener("change", updateSubmitButton);
-  $("#ev-city").addEventListener("change", updateSubmitButton);
   $("#submit-btn").addEventListener("click", submit);
-  // Wait a frame for deferred scripts
+
   const waitForLibs = () => new Promise((resolve) => {
     const ok = () => window.jspdf && window.SignaturePad;
     if (ok()) return resolve();

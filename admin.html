@@ -37,12 +37,38 @@
 
     <div class="card">
       <h2>1. Pick items</h2>
-      <p class="muted small">Select the items for this booking. The client will fill in their details and event info when they open the link.</p>
+      <p class="muted small">Select items — tap a selected item to edit its price. The client will fill in their event details when they open the link.</p>
       <div id="items-grid" class="items-grid"></div>
+
+      <h3 style="margin-top:24px;">Custom items</h3>
+      <p class="muted small">Add any items not listed above.</p>
+      <div class="row three" style="align-items:flex-end;">
+        <div style="flex:2"><label for="custom-name">Item name</label><input id="custom-name" type="text" placeholder="e.g. Extra hour, Tables & chairs"></div>
+        <div><label for="custom-price">Price (CAD)</label><input id="custom-price" type="number" min="0" step="1" placeholder="0"></div>
+        <div><button id="add-custom-btn" class="btn secondary" style="width:100%;margin-top:0">Add item</button></div>
+      </div>
+      <div id="custom-items-list" style="margin-top:12px;"></div>
     </div>
 
     <div class="card">
-      <h2>2. Summary</h2>
+      <h2>2. Delivery</h2>
+      <div class="row two">
+        <div>
+          <label for="inCity">Location</label>
+          <select id="inCity">
+            <option value="in">Inside City of Winnipeg (free delivery)</option>
+            <option value="out">Outside Winnipeg (delivery fee applies)</option>
+          </select>
+        </div>
+        <div>
+          <label for="deliveryFee">Delivery fee (CAD)</label>
+          <input id="deliveryFee" type="number" min="0" step="1" value="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Summary</h2>
       <table class="summary-table" id="summary-table">
         <thead>
           <tr><th>Item</th><th class="right">Price</th></tr>
@@ -50,6 +76,7 @@
         <tbody id="summary-body"><tr><td colspan="2" class="muted">No items selected yet.</td></tr></tbody>
         <tfoot>
           <tr><td>Subtotal</td><td class="right" id="sum-subtotal">$0</td></tr>
+          <tr><td>Delivery fee</td><td class="right" id="sum-delivery">$0</td></tr>
           <tr><td>Deposit (security / damage, refundable)</td><td class="right" id="sum-deposit">$150</td></tr>
           <tr><td>Total due</td><td class="right" id="sum-total">$150</td></tr>
         </tfoot>
@@ -58,7 +85,7 @@
     </div>
 
     <div class="card">
-      <h2>3. Internal notes</h2>
+      <h2>4. Internal notes</h2>
       <div class="row">
         <div>
           <label for="notes">Notes (not shown to client)</label>
@@ -68,7 +95,7 @@
     </div>
 
     <div class="card">
-      <h2>4. Generate booking link</h2>
+      <h2>5. Generate booking link</h2>
       <div id="admin-error" class="banner err hidden"></div>
       <button id="generate-btn" class="btn large">Generate link for client</button>
       <div id="result" class="hidden" style="margin-top:16px;">
