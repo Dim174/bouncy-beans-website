@@ -270,6 +270,48 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  $("#load-orders-btn").addEventListener("click", async () => {
+    const btn = $("#load-orders-btn");
+    btn.disabled = true;
+    btn.textContent = "Loading…";
+    try {
+      const r = await fetch(`${CONFIG.WORKER_URL}/api/orders`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!r.ok) throw new Error("Failed to load orders");
+      const orders = await r.json();
+      const list = $("#orders-list");
+      if (!orders.length) {
+        list.innerHTML = '<p class="muted small">No orders yet.</p>';
+      } else {
+        list.innerHTML = `
+          <table class="summary-table" style="width:100%">
+            <thead><tr>
+              <th>ID</th><th>Date</th><th>Client</th><th>Event date</th><th>Status</th><th class="right">Actions</th>
+            </tr></thead>
+            <tbody>
+              ${orders.map((o) => `
+                <tr>
+                  <td><span class="small muted">${escapeHtml(o.id)}</span></td>
+                  <td class="small">${escapeHtml(o.createdAt?.slice(0,10) || "—")}</td>
+                  <td>${escapeHtml(o.clientName)}<br><span class="muted small">${escapeHtml(o.clientEmail)}</span></td>
+                  <td>${escapeHtml(o.eventDate)}</td>
+                  <td><span style="color:${o.status === 'signed' ? '#16a34a' : '#d97706'};font-weight:600;">${o.status === 'signed' ? '✅ Signed' : '⏳ Pending'}</span></td>
+                  <td class="right">
+                    ${o.pdfUrl ? `<a href="${escapeHtml(o.pdfUrl)}" class="btn secondary" style="font-size:0.8rem;padding:4px 10px;" target="_blank">Download PDF</a>` : '—'}
+                  </td>
+                </tr>`).join("")}
+            </tbody>
+          </table>`;
+      }
+    } catch (e) {
+      $("#orders-list").innerHTML = `<p class="muted small" style="color:red;">${e.message}</p>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Refresh orders";
+    }
+  });
+
   $("#password").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#login-btn").click(); });
   $("#generate-btn").addEventListener("click", createBooking);
 
