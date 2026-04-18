@@ -114,7 +114,6 @@ async function loadOrder() {
     order = await r.json();
     if (order.status === "signed") { show("already-signed"); return; }
 
-    renderClient();
     renderItems();
     renderAgreement();
     show("view");
