@@ -53,24 +53,27 @@
     <section class="card">
       <h2>Event details</h2>
       <p class="muted small">Please fill in the details for your event.</p>
-      <div class="row two">
+      <div class="row">
         <div><label for="ev-date">Event date *</label><input id="ev-date" type="date"></div>
-        <div>
-          <label for="ev-hours">Rental duration *</label>
-          <select id="ev-hours">
-            <option value="1">1 hour</option>
-            <option value="2">2 hours</option>
-            <option value="3">3 hours</option>
-            <option value="4" selected>4 hours (max)</option>
-          </select>
-        </div>
       </div>
-      <div class="row two">
-        <div><label for="ev-setup">Setup time *</label><input id="ev-setup" type="time"></div>
-        <div><label for="ev-start">Event start *</label><input id="ev-start" type="time"></div>
+      <div class="row three">
+        <div><label for="ev-setup">Setup time *</label><select id="ev-setup"><option value="">— Select —</option></select></div>
+        <div><label for="ev-start">Event start *</label><select id="ev-start"><option value="">— Select —</option></select></div>
+        <div><label for="ev-end">Event end *</label><select id="ev-end"><option value="">— Select —</option></select></div>
       </div>
       <div class="row">
         <div><label for="ev-address">Event address *</label><input id="ev-address" type="text" placeholder="Street, City, Postal code"></div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="ev-hopper">Hopper style</label>
+          <select id="ev-hopper">
+            <option value="">No hopper / Not applicable</option>
+            <option value="Deer">🦌 Deer</option>
+            <option value="Cow">🐄 Cow</option>
+            <option value="Pink Unicorn">🦄 Pink Unicorn</option>
+          </select>
+        </div>
       </div>
       <div class="row">
         <div><label for="ci-notes">Notes or questions</label><textarea id="ci-notes" placeholder="Any special requests or questions? (optional)"></textarea></div>

@@ -11,6 +11,20 @@ const escapeHtml = (s) =>
 let order = null;
 let signaturePad = null;
 
+function buildTimeOptions() {
+  const options = ['<option value="">— Select —</option>'];
+  for (let h = 6; h <= 23; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const val = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      const period = h < 12 ? 'AM' : 'PM';
+      const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      const label = `${hour12}:${String(m).padStart(2,'0')} ${period}`;
+      options.push(`<option value="${val}">${label}</option>`);
+    }
+  }
+  return options.join('');
+}
+
 function getOrderId() {
   const u = new URL(window.location.href);
   return u.searchParams.get("id");
@@ -115,7 +129,8 @@ function updateSubmitButton() {
   const addressOk = $("#ev-address").value.trim().length > 0;
   const setupOk = $("#ev-setup").value.trim().length > 0;
   const startOk = $("#ev-start").value.trim().length > 0;
-  const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk
+  const endOk = $("#ev-end").value.trim().length > 0;
+  const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk && endOk
     && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
 }
@@ -154,8 +169,9 @@ async function submit() {
     date: $("#ev-date").value,
     setupTime: $("#ev-setup").value,
     start: $("#ev-start").value,
-    rentalHours: Number($("#ev-hours").value),
+    end: $("#ev-end").value,
     address: $("#ev-address").value.trim(),
+    hopper: $("#ev-hopper").value,
     inCity: order.inCity !== undefined ? order.inCity : true,
   };
 
@@ -165,7 +181,7 @@ async function submit() {
     return;
   }
 
-  if (!eventInfo.date || !eventInfo.address || !eventInfo.setupTime || !eventInfo.start) {
+  if (!eventInfo.date || !eventInfo.address || !eventInfo.setupTime || !eventInfo.start || !eventInfo.end) {
     errBox.textContent = "Please fill in all required event details.";
     errBox.classList.remove("hidden");
     return;
@@ -204,10 +220,17 @@ async function submit() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   $("#agree-check").addEventListener("change", updateSubmitButton);
-  ["ci-name", "ci-email", "ci-phone", "ev-date", "ev-address", "ev-setup", "ev-start"].forEach((id) =>
+  // Populate AM/PM time selects
+  const timeHtml = buildTimeOptions();
+  ["ev-setup", "ev-start", "ev-end"].forEach((id) => {
+    $("#" + id).innerHTML = timeHtml;
+    $("#" + id).addEventListener("change", updateSubmitButton);
+  });
+
+  ["ci-name", "ci-email", "ci-phone", "ev-date", "ev-address"].forEach((id) =>
     $("#" + id).addEventListener("input", updateSubmitButton)
   );
-  $("#ev-hours").addEventListener("change", updateSubmitButton);
+  $("#ev-date").addEventListener("change", updateSubmitButton);
   $("#submit-btn").addEventListener("click", submit);
 
   const waitForLibs = () => new Promise((resolve) => {
