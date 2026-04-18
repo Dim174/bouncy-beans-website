@@ -48,14 +48,42 @@
         <div><label for="ci-phone">Phone number</label><input id="ci-phone" type="tel" placeholder="Optional"></div>
         <div></div>
       </div>
-      <div class="row">
-        <div><label for="ci-notes">Notes or questions</label><textarea id="ci-notes" placeholder="Any special requests or questions? (optional)"></textarea></div>
-      </div>
     </section>
 
     <section class="card">
-      <h2>Booking details</h2>
-      <div id="client-block" class="row two"></div>
+      <h2>Event details</h2>
+      <p class="muted small">Please fill in the details for your event.</p>
+      <div class="row two">
+        <div><label for="ev-date">Event date *</label><input id="ev-date" type="date"></div>
+        <div>
+          <label for="ev-hours">Rental duration *</label>
+          <select id="ev-hours">
+            <option value="1">1 hour</option>
+            <option value="2">2 hours</option>
+            <option value="3">3 hours</option>
+            <option value="4" selected>4 hours (max)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row two">
+        <div><label for="ev-setup">Setup time *</label><input id="ev-setup" type="time"></div>
+        <div><label for="ev-start">Event start *</label><input id="ev-start" type="time"></div>
+      </div>
+      <div class="row">
+        <div><label for="ev-address">Event address *</label><input id="ev-address" type="text" placeholder="Street, City, Postal code"></div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="ev-city">Location</label>
+          <select id="ev-city">
+            <option value="in">Inside City of Winnipeg (free delivery)</option>
+            <option value="out">Outside Winnipeg (delivery fee may apply)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div><label for="ci-notes">Notes or questions</label><textarea id="ci-notes" placeholder="Any special requests or questions? (optional)"></textarea></div>
+      </div>
     </section>
 
     <section class="card">

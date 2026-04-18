@@ -36,55 +36,13 @@
   <section id="admin-view" class="hidden">
 
     <div class="card">
-      <h2>1. Event details</h2>
-      <p class="muted small">The client will fill in their own name, email, and phone when they open the link.</p>
-      <div class="row two">
-        <div><label for="eventDate">Event date *</label><input id="eventDate" type="date"></div>
-        <div><label for="rentalHours">Rental duration *</label>
-          <select id="rentalHours">
-            <option value="1">1 hour</option>
-            <option value="2">2 hours</option>
-            <option value="3">3 hours</option>
-            <option value="4" selected>4 hours (max)</option>
-          </select>
-        </div>
-      </div>
-      <div class="row two">
-        <div><label for="setupTime">Setup time *</label><input id="setupTime" type="time"></div>
-        <div><label for="eventStart">Event start *</label><input id="eventStart" type="time"></div>
-      </div>
-      <div class="row">
-        <div><label for="eventAddress">Event address *</label><input id="eventAddress" type="text" placeholder="Street, City, Postal code"></div>
-      </div>
-      <div class="row two">
-        <div>
-          <label for="inCity">Location</label>
-          <select id="inCity">
-            <option value="in">Inside City of Winnipeg (free delivery)</option>
-            <option value="out">Outside Winnipeg (delivery fee)</option>
-          </select>
-        </div>
-        <div>
-          <label for="deliveryFee">Delivery fee (CAD)</label>
-          <input id="deliveryFee" type="number" min="0" step="1" value="0">
-        </div>
-      </div>
-      <div class="row">
-        <div>
-          <label for="notes">Internal notes (not shown to client)</label>
-          <textarea id="notes" placeholder="Optional"></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>2. Pick items</h2>
-      <p class="muted small">Tap items to add them to the booking.</p>
+      <h2>1. Pick items</h2>
+      <p class="muted small">Select the items for this booking. The client will fill in their details and event info when they open the link.</p>
       <div id="items-grid" class="items-grid"></div>
     </div>
 
     <div class="card">
-      <h2>3. Summary</h2>
+      <h2>2. Summary</h2>
       <table class="summary-table" id="summary-table">
         <thead>
           <tr><th>Item</th><th class="right">Price</th></tr>
@@ -92,12 +50,21 @@
         <tbody id="summary-body"><tr><td colspan="2" class="muted">No items selected yet.</td></tr></tbody>
         <tfoot>
           <tr><td>Subtotal</td><td class="right" id="sum-subtotal">$0</td></tr>
-          <tr><td>Delivery fee</td><td class="right" id="sum-delivery">$0</td></tr>
           <tr><td>Deposit (security / damage, refundable)</td><td class="right" id="sum-deposit">$150</td></tr>
           <tr><td>Total due</td><td class="right" id="sum-total">$150</td></tr>
         </tfoot>
       </table>
       <p class="muted small">Deposit is $150 CAD and is refunded 24–48 hours after the event if no damage is found. The remaining balance is due the day of the event before setup.</p>
+    </div>
+
+    <div class="card">
+      <h2>3. Internal notes</h2>
+      <div class="row">
+        <div>
+          <label for="notes">Notes (not shown to client)</label>
+          <textarea id="notes" placeholder="Optional"></textarea>
+        </div>
+      </div>
     </div>
 
     <div class="card">

@@ -96,7 +96,11 @@ function setupSignaturePad() {
 function updateSubmitButton() {
   const nameOk = $("#ci-name").value.trim().length > 0;
   const emailOk = $("#ci-email").value.trim().length > 0;
-  const ok = nameOk && emailOk && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
+  const dateOk = $("#ev-date").value.trim().length > 0;
+  const addressOk = $("#ev-address").value.trim().length > 0;
+  const setupOk = $("#ev-setup").value.trim().length > 0;
+  const startOk = $("#ev-start").value.trim().length > 0;
+  const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
 }
 
@@ -132,8 +136,23 @@ async function submit() {
     notes: $("#ci-notes").value.trim(),
   };
 
+  const eventInfo = {
+    date: $("#ev-date").value,
+    setupTime: $("#ev-setup").value,
+    start: $("#ev-start").value,
+    rentalHours: Number($("#ev-hours").value),
+    address: $("#ev-address").value.trim(),
+    inCity: $("#ev-city").value === "in",
+  };
+
   if (!clientInfo.name || !clientInfo.email) {
     errBox.textContent = "Please fill in your full name and email address.";
+    errBox.classList.remove("hidden");
+    return;
+  }
+
+  if (!eventInfo.date || !eventInfo.address || !eventInfo.setupTime || !eventInfo.start) {
+    errBox.textContent = "Please fill in all required event details.";
     errBox.classList.remove("hidden");
     return;
   }
@@ -141,7 +160,7 @@ async function submit() {
   try {
     const signatureDataUrl = signaturePad.toDataURL("image/png");
     const signedAt = new Date().toISOString();
-    const orderForPdf = { ...order, client: clientInfo, signedAt };
+    const orderForPdf = { ...order, client: clientInfo, event: eventInfo, signedAt };
     const { dataUrl, filename } = await buildAgreementPDF(orderForPdf, signatureDataUrl);
 
     show("submitting");
@@ -158,6 +177,7 @@ async function submit() {
         pdfBase64: base64,
         pdfFilename: filename,
         clientInfo,
+        eventInfo,
       }),
     });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Submission failed");
@@ -172,9 +192,11 @@ async function submit() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   $("#agree-check").addEventListener("change", updateSubmitButton);
-  ["ci-name", "ci-email", "ci-phone"].forEach((id) =>
+  ["ci-name", "ci-email", "ci-phone", "ev-date", "ev-address", "ev-setup", "ev-start"].forEach((id) =>
     $("#" + id).addEventListener("input", updateSubmitButton)
   );
+  $("#ev-hours").addEventListener("change", updateSubmitButton);
+  $("#ev-city").addEventListener("change", updateSubmitButton);
   $("#submit-btn").addEventListener("click", submit);
   // Wait a frame for deferred scripts
   const waitForLibs = () => new Promise((resolve) => {

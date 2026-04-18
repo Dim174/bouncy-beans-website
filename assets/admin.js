@@ -85,12 +85,10 @@ function renderSummary() {
       .join("");
   }
   const subtotal = selected.reduce((s, i) => s + Number(i.price || 0), 0);
-  const delivery = Number($("#deliveryFee").value || 0);
   const deposit = CONFIG.BUSINESS.depositAmount;
   $("#sum-subtotal").textContent = fmt(subtotal);
-  $("#sum-delivery").textContent = fmt(delivery);
   $("#sum-deposit").textContent = fmt(deposit);
-  $("#sum-total").textContent = fmt(subtotal + delivery + deposit);
+  $("#sum-total").textContent = fmt(subtotal + deposit);
 }
 
 function escapeHtml(s) {
@@ -99,11 +97,6 @@ function escapeHtml(s) {
 
 // ---------- Create booking ----------
 function validate() {
-  const required = ["eventDate", "setupTime", "eventStart", "eventAddress"];
-  for (const id of required) {
-    const v = $("#" + id).value.trim();
-    if (!v) return `Missing: ${id}`;
-  }
   if (!state.selectedIds.size) return "Please select at least one item.";
   return null;
 }
@@ -119,16 +112,9 @@ async function createBooking() {
   }
   const payload = {
     client: {},
-    event: {
-      date: $("#eventDate").value,
-      setupTime: $("#setupTime").value,
-      start: $("#eventStart").value,
-      rentalHours: Number($("#rentalHours").value),
-      address: $("#eventAddress").value.trim(),
-      inCity: $("#inCity").value === "in",
-    },
+    event: {},
     items: [...state.selectedIds],
-    deliveryFee: Number($("#deliveryFee").value || 0),
+    deliveryFee: 0,
     deposit: CONFIG.BUSINESS.depositAmount,
     notes: $("#notes").value.trim(),
   };
@@ -166,9 +152,6 @@ async function createBooking() {
 
 // ---------- Boot ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  // recalc summary on delivery fee change
-  $("#deliveryFee").addEventListener("input", renderSummary);
-
   // copy / reset / logout
   $("#copy-btn").addEventListener("click", async () => {
     const text = $("#result-link-text").textContent;
@@ -182,11 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#new-btn").addEventListener("click", () => {
     state.selectedIds = new Set();
-    ["eventDate","setupTime","eventStart","eventAddress","notes"]
-      .forEach((id) => ($("#" + id).value = ""));
-    $("#deliveryFee").value = 0;
-    $("#rentalHours").value = 4;
-    $("#inCity").value = "in";
+    $("#notes").value = "";
     $("#result").classList.add("hidden");
     renderItems();
     renderSummary();
