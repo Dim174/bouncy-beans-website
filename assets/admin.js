@@ -297,13 +297,34 @@ document.addEventListener("DOMContentLoaded", async () => {
                   <td>${escapeHtml(o.clientName)}<br><span class="muted small">${escapeHtml(o.clientEmail)}</span></td>
                   <td>${escapeHtml(o.eventDate)}</td>
                   <td><span style="color:${o.status === 'signed' ? '#16a34a' : '#d97706'};font-weight:600;">${o.status === 'signed' ? '✅ Signed' : '⏳ Pending'}</span></td>
-                  <td class="right">
-                    ${o.pdfUrl ? `<a href="${escapeHtml(o.pdfUrl)}" class="btn secondary" style="font-size:0.8rem;padding:4px 10px;" target="_blank">Download PDF</a>` : '—'}
+                  <td class="right" style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
+                    ${o.pdfUrl ? `<a href="${escapeHtml(o.pdfUrl)}" class="btn secondary" style="font-size:0.8rem;padding:4px 10px;" target="_blank">Download PDF</a>` : ''}
+                    <button class="btn ghost delete-order-btn" data-id="${escapeHtml(o.id)}" style="font-size:0.8rem;padding:4px 10px;color:#dc2626;">Delete</button>
                   </td>
                 </tr>`).join("")}
             </tbody>
           </table>`;
       }
+      // Attach delete buttons
+      document.querySelectorAll(".delete-order-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!confirm(`Delete order ${btn.dataset.id}? This cannot be undone.`)) return;
+          btn.disabled = true;
+          btn.textContent = "Deleting…";
+          try {
+            const r = await fetch(`${CONFIG.WORKER_URL}/api/orders/${encodeURIComponent(btn.dataset.id)}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${getToken()}` },
+            });
+            if (!r.ok) throw new Error("Delete failed");
+            btn.closest("tr").remove();
+          } catch (e) {
+            alert("Could not delete: " + e.message);
+            btn.disabled = false;
+            btn.textContent = "Delete";
+          }
+        });
+      });
     } catch (e) {
       $("#orders-list").innerHTML = `<p class="muted small" style="color:red;">${e.message}</p>`;
     } finally {
