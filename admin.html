@@ -36,20 +36,11 @@
   <section id="admin-view" class="hidden">
 
     <div class="card">
-      <h2>1. Client information</h2>
+      <h2>1. Event details</h2>
+      <p class="muted small">The client will fill in their own name, email, and phone when they open the link.</p>
       <div class="row two">
-        <div><label for="clientName">Client name *</label><input id="clientName" type="text"></div>
-        <div><label for="clientEmail">Client email *</label><input id="clientEmail" type="email"></div>
-      </div>
-      <div class="row two">
-        <div><label for="clientPhone">Client phone</label><input id="clientPhone" type="tel"></div>
         <div><label for="eventDate">Event date *</label><input id="eventDate" type="date"></div>
-      </div>
-      <div class="row three">
-        <div><label for="setupTime">Setup time *</label><input id="setupTime" type="time"></div>
-        <div><label for="eventStart">Event start *</label><input id="eventStart" type="time"></div>
-        <div>
-          <label for="rentalHours">Rental duration *</label>
+        <div><label for="rentalHours">Rental duration *</label>
           <select id="rentalHours">
             <option value="1">1 hour</option>
             <option value="2">2 hours</option>
@@ -57,6 +48,10 @@
             <option value="4" selected>4 hours (max)</option>
           </select>
         </div>
+      </div>
+      <div class="row two">
+        <div><label for="setupTime">Setup time *</label><input id="setupTime" type="time"></div>
+        <div><label for="eventStart">Event start *</label><input id="eventStart" type="time"></div>
       </div>
       <div class="row">
         <div><label for="eventAddress">Event address *</label><input id="eventAddress" type="text" placeholder="Street, City, Postal code"></div>

@@ -25,9 +25,6 @@ function show(id) {
 function renderClient() {
   const c = $("#client-block");
   const rows = [
-    ["Client name", order.client?.name],
-    ["Email", order.client?.email],
-    ["Phone", order.client?.phone || "—"],
     ["Event date", order.event?.date],
     ["Setup time", order.event?.setupTime],
     ["Event start", order.event?.start],
@@ -97,7 +94,9 @@ function setupSignaturePad() {
 }
 
 function updateSubmitButton() {
-  const ok = $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
+  const nameOk = $("#ci-name").value.trim().length > 0;
+  const emailOk = $("#ci-email").value.trim().length > 0;
+  const ok = nameOk && emailOk && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
 }
 
@@ -125,10 +124,24 @@ async function submit() {
   if (!signaturePad || signaturePad.isEmpty()) return;
   const errBox = $("#sign-error");
   errBox.classList.add("hidden");
+
+  const clientInfo = {
+    name: $("#ci-name").value.trim(),
+    email: $("#ci-email").value.trim(),
+    phone: $("#ci-phone").value.trim(),
+    notes: $("#ci-notes").value.trim(),
+  };
+
+  if (!clientInfo.name || !clientInfo.email) {
+    errBox.textContent = "Please fill in your full name and email address.";
+    errBox.classList.remove("hidden");
+    return;
+  }
+
   try {
     const signatureDataUrl = signaturePad.toDataURL("image/png");
     const signedAt = new Date().toISOString();
-    const orderForPdf = { ...order, signedAt };
+    const orderForPdf = { ...order, client: clientInfo, signedAt };
     const { dataUrl, filename } = await buildAgreementPDF(orderForPdf, signatureDataUrl);
 
     show("submitting");
@@ -144,6 +157,7 @@ async function submit() {
         signatureDataUrl,   // for audit trail
         pdfBase64: base64,
         pdfFilename: filename,
+        clientInfo,
       }),
     });
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Submission failed");
@@ -158,6 +172,9 @@ async function submit() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   $("#agree-check").addEventListener("change", updateSubmitButton);
+  ["ci-name", "ci-email", "ci-phone"].forEach((id) =>
+    $("#" + id).addEventListener("input", updateSubmitButton)
+  );
   $("#submit-btn").addEventListener("click", submit);
   // Wait a frame for deferred scripts
   const waitForLibs = () => new Promise((resolve) => {

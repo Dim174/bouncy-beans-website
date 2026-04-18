@@ -99,7 +99,7 @@ function escapeHtml(s) {
 
 // ---------- Create booking ----------
 function validate() {
-  const required = ["clientName", "clientEmail", "eventDate", "setupTime", "eventStart", "eventAddress"];
+  const required = ["eventDate", "setupTime", "eventStart", "eventAddress"];
   for (const id of required) {
     const v = $("#" + id).value.trim();
     if (!v) return `Missing: ${id}`;
@@ -118,11 +118,7 @@ async function createBooking() {
     return;
   }
   const payload = {
-    client: {
-      name: $("#clientName").value.trim(),
-      email: $("#clientEmail").value.trim(),
-      phone: $("#clientPhone").value.trim(),
-    },
+    client: {},
     event: {
       date: $("#eventDate").value,
       setupTime: $("#setupTime").value,
@@ -186,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#new-btn").addEventListener("click", () => {
     state.selectedIds = new Set();
-    ["clientName","clientEmail","clientPhone","eventDate","setupTime","eventStart","eventAddress","notes"]
+    ["eventDate","setupTime","eventStart","eventAddress","notes"]
       .forEach((id) => ($("#" + id).value = ""));
     $("#deliveryFee").value = 0;
     $("#rentalHours").value = 4;

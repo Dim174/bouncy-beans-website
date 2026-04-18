@@ -38,7 +38,23 @@
   <div id="view" class="hidden">
 
     <section class="card">
-      <h2>Your booking</h2>
+      <h2>Your information</h2>
+      <p class="muted small">Please fill in your details to complete the agreement.</p>
+      <div class="row two">
+        <div><label for="ci-name">Full name *</label><input id="ci-name" type="text" placeholder="Your full name"></div>
+        <div><label for="ci-email">Email address *</label><input id="ci-email" type="email" placeholder="your@email.com"></div>
+      </div>
+      <div class="row two">
+        <div><label for="ci-phone">Phone number</label><input id="ci-phone" type="tel" placeholder="Optional"></div>
+        <div></div>
+      </div>
+      <div class="row">
+        <div><label for="ci-notes">Notes or questions</label><textarea id="ci-notes" placeholder="Any special requests or questions? (optional)"></textarea></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Booking details</h2>
       <div id="client-block" class="row two"></div>
     </section>
 
