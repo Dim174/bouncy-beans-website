@@ -1,7 +1,7 @@
 import { CONFIG } from "./config.js";
 import { AGREEMENT_SECTIONS } from "./agreement.js";
 import { getItemById } from "./items.js";
-import { buildAgreementPDF } from "./pdf.js";
+import { buildAgreementPDF } from "./pdf.js?v=2";
 
 const $ = (s) => document.querySelector(s);
 const money = (n) => "$" + Number(n || 0).toFixed(0);
