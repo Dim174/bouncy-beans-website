@@ -131,6 +131,7 @@ async function loadOrder() {
     if (r.status === 404) { show("not-found"); return; }
     if (!r.ok) throw new Error("Server error");
     order = await r.json();
+    console.log("[sign.js v2] order:", JSON.stringify({ items: order.items, customItems: order.customItems, lineItems: order.lineItems }));
     if (order.status === "signed") { show("already-signed"); return; }
     renderItems();
     renderAgreement();
