@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   ["ci-name", "ci-email", "ci-phone", "ev-date", "ev-address"].forEach((id) =>
     $("#" + id).addEventListener("input", updateSubmitButton)
   );
-  ["ev-setup", "ev-start", "ev-end"].forEach((id) =>
+  ["ev-setup", "ev-start", "ev-end", "ev-hopper"].forEach((id) =>
     $("#" + id).addEventListener("change", updateSubmitButton)
   );
   $("#ev-date").addEventListener("change", updateSubmitButton);

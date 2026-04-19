@@ -167,12 +167,20 @@ async function createBooking() {
     errBox.classList.remove("hidden");
     return;
   }
+  // Build resolved line items (names + final prices) for use in emails
+  const selectedCatalog = ITEMS.filter((i) => state.selectedIds.has(i.id));
+  const lineItems = [
+    ...selectedCatalog.map((i) => ({ name: i.name, price: getItemPrice(i) })),
+    ...state.customItems.map((ci) => ({ name: ci.name, price: Number(ci.price || 0) })),
+  ];
+
   const payload = {
     client: {},
     event: {},
     items: [...state.selectedIds],
     priceOverrides: { ...state.priceOverrides },
     customItems: state.customItems.map((ci) => ({ ...ci })),
+    lineItems,
     deliveryFee: Number($("#deliveryFee").value || 0),
     inCity: $("#inCity").value === "in",
     deposit: CONFIG.BUSINESS.depositAmount,
