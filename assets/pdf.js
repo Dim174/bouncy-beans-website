@@ -135,14 +135,19 @@ function drawItemsTable(doc, cursor, order) {
   doc.setTextColor(...TEXT);
 
   let subtotal = 0;
-  for (const itemId of order.items) {
+
+  // Catalog items (with price overrides)
+  for (const itemId of (order.items || [])) {
     const it = getItemById(itemId);
     if (!it) continue;
+    const price = (order.priceOverrides && order.priceOverrides[itemId] !== undefined)
+      ? Number(order.priceOverrides[itemId])
+      : Number(it.price || 0);
     ensureSpace(doc, cursor, 7);
     doc.setFont("helvetica", "bold");
     doc.text(it.name, MARGIN_L, cursor.y);
     doc.setFont("helvetica", "normal");
-    doc.text(money(it.price), PAGE_W - MARGIN_R, cursor.y, { align: "right" });
+    doc.text(money(price), PAGE_W - MARGIN_R, cursor.y, { align: "right" });
     if (it.ageRange) {
       doc.setTextColor(...MUTED);
       doc.setFontSize(9);
@@ -153,7 +158,19 @@ function drawItemsTable(doc, cursor, order) {
     } else {
       cursor.y += 6;
     }
-    subtotal += Number(it.price || 0);
+    subtotal += price;
+  }
+
+  // Custom items
+  for (const ci of (order.customItems || [])) {
+    const price = Number(ci.price || 0);
+    ensureSpace(doc, cursor, 7);
+    doc.setFont("helvetica", "bold");
+    doc.text(String(ci.name), MARGIN_L, cursor.y);
+    doc.setFont("helvetica", "normal");
+    doc.text(money(price), PAGE_W - MARGIN_R, cursor.y, { align: "right" });
+    cursor.y += 6;
+    subtotal += price;
   }
 
   // Totals
@@ -285,7 +302,8 @@ export async function buildAgreementPDF(order, signatureDataUrl) {
     ["Event date", order.event?.date],
     ["Setup time", order.event?.setupTime],
     ["Event start", order.event?.start],
-    ["Rental duration", `${order.event?.rentalHours} hour${order.event?.rentalHours === 1 ? "" : "s"}`],
+    ["Event end", order.event?.end || "—"],
+    ["Hopper style", order.event?.hopper || "—"],
     ["Event address", order.event?.address],
   ]);
 
