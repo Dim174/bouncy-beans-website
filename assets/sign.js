@@ -130,7 +130,7 @@ function updateSubmitButton() {
   const setupOk = $("#ev-setup").value.trim().length > 0;
   const startOk = $("#ev-start").value.trim().length > 0;
   const endOk = $("#ev-end").value.trim().length > 0;
-  const hopperOk = $("#ev-hopper").value.trim().length > 0;
+  const hopperOk = (order && order.agreementType === "pickup") || $("#ev-hopper").value.trim().length > 0;
   const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk && endOk && hopperOk
     && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
