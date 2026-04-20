@@ -90,12 +90,15 @@ function renderAgreement() {
 
 function adaptFormForAgreementType() {
   if (order.agreementType === "pickup") {
-    // Rename "Setup time" to "Pickup time" for self-pickup orders
+    // Rename "Setup time" to "Pickup time"
     const setupLabel = document.querySelector('label[for="ev-setup"]');
     if (setupLabel) setupLabel.textContent = "Pickup time *";
     // Hide hopper (not applicable for bounce house self-pickup)
     const hopperRow = $("#ev-hopper").closest(".row");
     if (hopperRow) hopperRow.style.display = "none";
+    // Hide event start & end (not needed for pickup)
+    const timeRow = $("#ev-start").closest(".row");
+    if (timeRow) timeRow.style.display = "none";
   }
 }
 
@@ -128,9 +131,10 @@ function updateSubmitButton() {
   const dateOk = $("#ev-date").value.trim().length > 0;
   const addressOk = $("#ev-address").value.trim().length > 0;
   const setupOk = $("#ev-setup").value.trim().length > 0;
-  const startOk = $("#ev-start").value.trim().length > 0;
-  const endOk = $("#ev-end").value.trim().length > 0;
-  const hopperOk = (order && order.agreementType === "pickup") || $("#ev-hopper").value.trim().length > 0;
+  const isPickup = order && order.agreementType === "pickup";
+  const startOk = isPickup || $("#ev-start").value.trim().length > 0;
+  const endOk = isPickup || $("#ev-end").value.trim().length > 0;
+  const hopperOk = isPickup || $("#ev-hopper").value.trim().length > 0;
   const ok = nameOk && emailOk && dateOk && addressOk && setupOk && startOk && endOk && hopperOk
     && $("#agree-check").checked && signaturePad && !signaturePad.isEmpty();
   $("#submit-btn").disabled = !ok;
