@@ -51,7 +51,21 @@
     </div>
 
     <div class="card">
-      <h2>2. Delivery</h2>
+      <h2>2. Agreement type</h2>
+      <p class="muted small">Choose which rental agreement to send to the client.</p>
+      <div class="row">
+        <div>
+          <label for="agreementType">Rental type</label>
+          <select id="agreementType">
+            <option value="delivery">Soft Play — Full Service (we deliver, set up &amp; take down)</option>
+            <option value="pickup">Bounce House — Self Pick-Up (client picks up &amp; operates)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="delivery-card">
+      <h2>3. Delivery</h2>
       <div class="row two">
         <div>
           <label for="inCity">Location</label>
@@ -68,7 +82,7 @@
     </div>
 
     <div class="card">
-      <h2>3. Summary</h2>
+      <h2>4. Summary</h2>
       <table class="summary-table" id="summary-table">
         <thead>
           <tr><th>Item</th><th class="right">Price</th></tr>
@@ -85,7 +99,7 @@
     </div>
 
     <div class="card">
-      <h2>4. Internal notes</h2>
+      <h2>5. Internal notes</h2>
       <div class="row">
         <div>
           <label for="notes">Notes (not shown to client)</label>
@@ -95,7 +109,7 @@
     </div>
 
     <div class="card">
-      <h2>5. Generate booking link</h2>
+      <h2>6. Generate booking link</h2>
       <div id="admin-error" class="banner err hidden"></div>
       <button id="generate-btn" class="btn large">Generate link for client</button>
       <div id="result" class="hidden" style="margin-top:16px;">

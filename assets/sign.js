@@ -1,7 +1,8 @@
 import { CONFIG } from "./config.js";
 import { AGREEMENT_SECTIONS } from "./agreement.js";
+import { AGREEMENT_SECTIONS_PICKUP } from "./agreement-pickup.js";
 import { getItemById } from "./items.js";
-import { buildAgreementPDF } from "./pdf.js?v=2";
+import { buildAgreementPDF } from "./pdf.js?v=3";
 
 const $ = (s) => document.querySelector(s);
 const money = (n) => "$" + Number(n || 0).toFixed(0);
@@ -75,8 +76,9 @@ function renderItems() {
 }
 
 function renderAgreement() {
+  const sections = order.agreementType === "pickup" ? AGREEMENT_SECTIONS_PICKUP : AGREEMENT_SECTIONS;
   const wrap = $("#agreement");
-  wrap.innerHTML = AGREEMENT_SECTIONS
+  wrap.innerHTML = sections
     .map((s) => {
       let body = "";
       if (s.paragraphs) body += s.paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join("");
@@ -84,6 +86,17 @@ function renderAgreement() {
       return `<h3>${escapeHtml(s.title)}</h3>${body}`;
     })
     .join("");
+}
+
+function adaptFormForAgreementType() {
+  if (order.agreementType === "pickup") {
+    // Rename "Setup time" to "Pickup time" for self-pickup orders
+    const setupLabel = document.querySelector('label[for="ev-setup"]');
+    if (setupLabel) setupLabel.textContent = "Pickup time *";
+    // Hide hopper (not applicable for bounce house self-pickup)
+    const hopperRow = $("#ev-hopper").closest(".row");
+    if (hopperRow) hopperRow.style.display = "none";
+  }
 }
 
 function setupSignaturePad() {
@@ -133,6 +146,7 @@ async function loadOrder() {
     order = await r.json();
     console.log("[sign.js v2] order:", JSON.stringify({ items: order.items, customItems: order.customItems, lineItems: order.lineItems }));
     if (order.status === "signed") { show("already-signed"); return; }
+    adaptFormForAgreementType();
     renderItems();
     renderAgreement();
     show("view");

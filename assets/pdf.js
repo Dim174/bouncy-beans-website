@@ -4,6 +4,7 @@
 
 import { CONFIG } from "./config.js";
 import { AGREEMENT_TITLE, AGREEMENT_SECTIONS } from "./agreement.js";
+import { AGREEMENT_TITLE_PICKUP, AGREEMENT_SECTIONS_PICKUP } from "./agreement-pickup.js";
 import { getItemById } from "./items.js";
 
 const BRAND = [224, 71, 126];      // #e0477e
@@ -198,10 +199,10 @@ function drawItemsTable(doc, cursor, order) {
   cursor.y += 2;
 }
 
-function drawAgreement(doc, cursor) {
+function drawAgreement(doc, cursor, sections) {
   drawSectionTitle(doc, cursor, "Rental Agreement — Terms & Conditions");
   doc.setFontSize(10);
-  for (const section of AGREEMENT_SECTIONS) {
+  for (const section of sections) {
     ensureSpace(doc, cursor, 10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...TEXT);
@@ -290,25 +291,31 @@ export async function buildAgreementPDF(order, signatureDataUrl) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
+  const isPickup = order.agreementType === "pickup";
+  const agreementSections = isPickup ? AGREEMENT_SECTIONS_PICKUP : AGREEMENT_SECTIONS;
+
   const cursor = { y: MARGIN_T };
   drawHeader(doc, cursor, order);
 
   // Client info block
   drawSectionTitle(doc, cursor, "Client & Event");
-  drawKeyVals(doc, cursor, [
+  const eventRows = [
     ["Client name", order.client?.name],
     ["Client email", order.client?.email],
     ["Client phone", order.client?.phone || "—"],
     ["Event date", order.event?.date],
-    ["Setup time", order.event?.setupTime],
+    [isPickup ? "Pickup time" : "Setup time", order.event?.setupTime],
     ["Event start", order.event?.start],
     ["Event end", order.event?.end || "—"],
-    ["Hopper style", order.event?.hopper || "—"],
     ["Event address", order.event?.address],
-  ]);
+  ];
+  if (!isPickup) {
+    eventRows.splice(7, 0, ["Hopper style", order.event?.hopper || "—"]);
+  }
+  drawKeyVals(doc, cursor, eventRows);
 
   drawItemsTable(doc, cursor, order);
-  drawAgreement(doc, cursor);
+  drawAgreement(doc, cursor, agreementSections);
   drawSignature(doc, cursor, order, signatureDataUrl);
 
   // Footer on every page

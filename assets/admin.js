@@ -181,6 +181,7 @@ async function createBooking() {
     priceOverrides: { ...state.priceOverrides },
     customItems: state.customItems.map((ci) => ({ ...ci })),
     lineItems,
+    agreementType: $("#agreementType").value || "delivery",
     deliveryFee: Number($("#deliveryFee").value || 0),
     inCity: $("#inCity").value === "in",
     deposit: CONFIG.BUSINESS.depositAmount,
@@ -219,6 +220,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#deliveryFee").addEventListener("input", renderSummary);
   $("#inCity").addEventListener("change", renderSummary);
 
+  function updateAgreementType() {
+    const isPickup = $("#agreementType").value === "pickup";
+    $("#delivery-card").style.display = isPickup ? "none" : "";
+    if (isPickup) {
+      $("#deliveryFee").value = 0;
+      renderSummary();
+    }
+  }
+  $("#agreementType").addEventListener("change", updateAgreementType);
+  updateAgreementType();
+
   $("#add-custom-btn").addEventListener("click", () => {
     const name = $("#custom-name").value.trim();
     const price = Number($("#custom-price").value || 0);
@@ -248,6 +260,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("#notes").value = "";
     $("#deliveryFee").value = 0;
     $("#inCity").value = "in";
+    $("#agreementType").value = "delivery";
+    updateAgreementType();
     $("#result").classList.add("hidden");
     renderItems();
     renderCustomItems();
