@@ -190,7 +190,9 @@ async function submit() {
     return;
   }
 
-  if (!eventInfo.date || !eventInfo.address || !eventInfo.setupTime || !eventInfo.start || !eventInfo.end) {
+  const isPickup = order && order.agreementType === "pickup";
+  const timeFieldsOk = isPickup || (eventInfo.start && eventInfo.end);
+  if (!eventInfo.date || !eventInfo.address || !eventInfo.setupTime || !timeFieldsOk) {
     errBox.textContent = "Please fill in all required event details.";
     errBox.classList.remove("hidden");
     return;
