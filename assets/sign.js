@@ -96,9 +96,11 @@ function adaptFormForAgreementType() {
     // Hide hopper (not applicable for bounce house self-pickup)
     const hopperRow = $("#ev-hopper").closest(".row");
     if (hopperRow) hopperRow.style.display = "none";
-    // Hide event start & end (not needed for pickup)
-    const timeRow = $("#ev-start").closest(".row");
-    if (timeRow) timeRow.style.display = "none";
+    // Hide event start & end columns only (ev-setup stays visible as pickup time)
+    const startCol = $("#ev-start").parentElement;
+    const endCol = $("#ev-end").parentElement;
+    if (startCol) startCol.style.display = "none";
+    if (endCol) endCol.style.display = "none";
   }
 }
 
